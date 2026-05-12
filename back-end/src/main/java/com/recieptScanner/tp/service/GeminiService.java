@@ -84,7 +84,6 @@ public class GeminiService {
 
     public String getApiKey() {
         String apiKey = System.getenv("GEMINI_API_KEY");
-        System.out.println("GEMINI_API_KEY from env: " + apiKey);
         if (apiKey == null || apiKey.isBlank()) {
             apiKey = loadApiKeyFromDotEnv();
         }

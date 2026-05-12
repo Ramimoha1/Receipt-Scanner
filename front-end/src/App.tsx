@@ -656,12 +656,7 @@ export default function App() {
                 >
                   NEW RECEIPT
                 </button>
-                <button
-                  onClick={() => setViewMode('HISTORY')}
-                  className="px-6 py-3 bg-white/10 text-white rounded-xl font-black text-sm hover:bg-white/20 transition-all active:scale-95"
-                >
-                  VIEW HISTORY
-                </button>
+          
               </div>
             </motion.div>
           )}
