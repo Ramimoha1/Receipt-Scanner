@@ -1,0 +1,6 @@
+{
+  "name": "ReceiptScanner AI",
+  "description": "Extract data from receipt images and auto-fill forms using Gemini AI.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
