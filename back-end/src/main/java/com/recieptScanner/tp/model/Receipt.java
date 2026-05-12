@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
+import org.hibernate.annotations.JdbcTypeCode;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -35,10 +37,11 @@ public class Receipt {
     @Column(length = 10)
     private String currency;
 
-    @Column(name = "image_url", nullable = false)
+    @Column(name = "image_url", nullable = false, columnDefinition = "TEXT")
     private String imageUrl;
 
-    @Column(name = "raw_ai_response", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "raw_ai_response", columnDefinition = "jsonb", nullable = true)
     private String rawAiResponse;
 
     @Column(length = 50)
@@ -59,6 +62,16 @@ public class Receipt {
         }
         if (status == null || status.isBlank()) {
             status = "PENDING";
+        }
+        if (rawAiResponse != null && rawAiResponse.isBlank()) {
+            rawAiResponse = null;
+        }
+    }
+
+    @PreUpdate
+    void normalizeJsonField() {
+        if (rawAiResponse != null && rawAiResponse.isBlank()) {
+            rawAiResponse = null;
         }
     }
 
