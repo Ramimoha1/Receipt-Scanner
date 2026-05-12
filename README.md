@@ -2,6 +2,8 @@
 
 An AI-powered receipt digitization application that extracts receipt details using Google's Gemini 2.5 Flash API and stores them in PostgreSQL.
 
+demo  [video](https://youtu.be/UGEFvt-m92o)
+
 ## Tech Stack
 
 - **Frontend**: React 19 + TypeScript + Vite
