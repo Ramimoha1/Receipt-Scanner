@@ -17,20 +17,104 @@ import {
   FileText,
   AlertCircle,
   History,
+<<<<<<< Updated upstream
   Calendar,
   DollarSign,
+=======
+  Loader2,
+  Plus,
+  Receipt,
+  RefreshCcw,
+  Sparkles,
+>>>>>>> Stashed changes
   Store,
   ChevronRight
 } from 'lucide-react';
 import { cn } from './lib/utils';
+<<<<<<< Updated upstream
 import { AppState, ReceiptData, ReceiptItem, ViewMode } from './types';
 import { extractReceiptData } from './services/gemini';
+=======
+import {
+  AppState,
+  ReceiptFormValues,
+  ReceiptRecord,
+  ReceiptStatus,
+  ViewMode,
+} from './types';
+import {
+  useCreateReceipt,
+  useDeleteReceipt,
+  useReceipts,
+  useUpdateReceipt,
+} from './api/receiptApi';
+import { extractReceiptData } from './services/gemini';
+
+const today = new Date().toISOString().slice(0, 10);
+
+const createEmptyDraft = (imageUrl = ''): ReceiptFormValues => ({
+  merchantName: '',
+  transactionDate: today,
+  totalAmount: 0,
+  currency: 'MYR',
+  imageUrl,
+  status: 'PENDING',
+});
+
+function formatCurrency(currency: string, amount: number) {
+  return `${currency} ${Number(amount || 0).toFixed(2)}`;
+}
+function parseDateToIso(dateStr?: string | null): string {
+    // 1. Handle missing or literal "null" strings
+    if (!dateStr || dateStr.toLowerCase() === 'null') {
+      return today; 
+    }
+
+    // 2. If Gemini followed instructions perfectly (YYYY-MM-DD), return as-is
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      return dateStr;
+    }
+
+    // 3. If Gemini went rogue (e.g., "12 May 2026" or "05/12/2026"), try to salvage it
+    const parsed = new Date(dateStr);
+    if (!Number.isNaN(parsed.getTime())) {
+      // Convert valid but weirdly formatted dates back to YYYY-MM-DD
+      return parsed.toISOString().slice(0, 10);
+    }
+
+    // 4. Ultimate fallback if the string is complete gibberish
+    return today;
+  }
+
+function formatDateLabel(value?: string | null) {
+  if (!value) return 'Unknown date';
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value;
+  return parsed.toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
+function statusLabel(status?: ReceiptStatus) {
+  switch (status) {
+    case 'SAVED':
+      return 'Saved';
+    case 'REVIEWED':
+      return 'Reviewed';
+    default:
+      return 'Pending';
+  }
+}
+>>>>>>> Stashed changes
 
 export default function App() {
   const [state, setState] = useState<AppState>('IDLE');
   const [viewMode, setViewMode] = useState<ViewMode>('SCAN');
   const [error, setError] = useState<string | null>(null);
   const [receiptImage, setReceiptImage] = useState<string | null>(null);
+<<<<<<< Updated upstream
   const [extractedData, setExtractedData] = useState<ReceiptData | null>(null);
   const [history, setHistory] = useState<ReceiptData[]>([]);
 
@@ -44,6 +128,29 @@ export default function App() {
         console.error("Failed to load history", e);
       }
     }
+=======
+  const [draft, setDraft] = useState<ReceiptFormValues | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [isPrefilling, setIsPrefilling] = useState(false);
+  const [prefillError, setPrefillError] = useState<string | null>(null);
+
+  const receiptsQuery = useReceipts();
+  const createReceiptMutation = useCreateReceipt();
+  const updateReceiptMutation = useUpdateReceipt();
+  const deleteReceiptMutation = useDeleteReceipt();
+
+  const receipts = receiptsQuery.data ?? [];
+  const isSaving = createReceiptMutation.isPending || updateReceiptMutation.isPending;
+
+  const resetComposer = useCallback(() => {
+    setState('IDLE');
+    setError(null);
+    setPrefillError(null);
+    setIsPrefilling(false);
+    setReceiptImage(null);
+    setDraft(null);
+    setEditingId(null);
+>>>>>>> Stashed changes
   }, []);
 
   // Save history to localStorage
@@ -58,12 +165,51 @@ export default function App() {
     if (!file) return;
 
     const reader = new FileReader();
+<<<<<<< Updated upstream
     reader.onload = () => {
       setReceiptImage(reader.result as string);
       handleExtraction(reader.result as string, file.type);
+=======
+    reader.onload = async () => {
+      const imageUrl = String(reader.result ?? '');
+      setReceiptImage(imageUrl);
+      setDraft(createEmptyDraft(imageUrl));
+      setEditingId(null);
+      setError(null);
+      setPrefillError(null);
+      setViewMode('SCAN');
+      setState('REVIEW');
+>>>>>>> Stashed changes
     };
     reader.readAsDataURL(file);
   }, [history]);
+
+  const handlePrefillWithAI = useCallback(async () => {
+    if (!receiptImage) return;
+    setPrefillError(null);
+    setIsPrefilling(true);
+
+    try {
+      const mimeType = receiptImage.split(';')[0].split(':')[1] || 'image/jpeg';
+      const aiData = await extractReceiptData(receiptImage, mimeType);
+      setDraft((current) => {
+        if (!current) return current;
+        return {
+          ...current,
+          merchantName: aiData.merchantName || current.merchantName,
+          transactionDate: parseDateToIso(aiData.date) || current.transactionDate,
+          totalAmount: aiData.totalAmount ?? current.totalAmount,
+          currency: aiData.currency || current.currency,
+        };
+      });
+    } catch (err) {
+      console.error(err);
+      const message = err instanceof Error ? err.message : 'ai failed';
+      setPrefillError(message);
+    } finally {
+      setIsPrefilling(false);
+    }
+  }, [receiptImage]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -203,11 +349,19 @@ export default function App() {
               </div>
 
               {viewMode === 'SCAN' ? (
+<<<<<<< Updated upstream
                 <div className="max-w-2xl mx-auto">
                   <div className="text-center mb-8">
                     <h1 className="text-3xl font-bold text-slate-900 mb-2">Receipt Extraction</h1>
                     <p className="text-slate-500">Fast, accurate data processing for your business expenses.</p>
                   </div>
+=======
+                <div className="max-w-3xl mx-auto w-full">
+                    <div className="text-center mb-8">
+                      <h1 className="text-3xl font-bold text-slate-900 mb-2">AI Receipt Prefill</h1>
+                      <p className="text-slate-500">Upload an image and let AI fill the receipt form before you save it.</p>
+                    </div>
+>>>>>>> Stashed changes
 
                   {error && (
                     <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-xl flex items-start gap-3 text-red-700">
@@ -222,6 +376,7 @@ export default function App() {
                       "relative border-2 border-dashed rounded-3xl p-16 text-center cursor-pointer transition-all duration-300 group bg-white",
                       isDragActive ? "border-indigo-400 bg-indigo-50/50 scale-[1.02]" : "border-slate-200 hover:border-indigo-300 hover:shadow-xl hover:shadow-indigo-50 shadow-sm"
                     )}
+<<<<<<< Updated upstream
                   >
                     <input {...getInputProps()} />
                     <div className="flex flex-col items-center">
@@ -233,6 +388,35 @@ export default function App() {
                           "w-10 h-10 transition-colors",
                           isDragActive ? "text-indigo-600" : "text-indigo-400 group-hover:text-indigo-500"
                         )} />
+=======
+
+                    <div
+                      {...getRootProps()}
+                      className={cn(
+                        'relative border-2 border-dashed rounded-3xl p-12 text-center cursor-pointer transition-all duration-300 group bg-white',
+                        isDragActive
+                          ? 'border-indigo-400 bg-indigo-50/50 scale-[1.01]'
+                          : 'border-slate-200 hover:border-indigo-300 hover:shadow-xl hover:shadow-indigo-50 shadow-sm',
+                      )}
+                    >
+                      <input {...getInputProps()} />
+                      <div className="flex flex-col items-center">
+                        <div className={cn(
+                          'w-20 h-20 rounded-full flex items-center justify-center mb-6 transition-all duration-300',
+                          isDragActive ? 'bg-indigo-100 scale-110 rotate-12' : 'bg-indigo-50 group-hover:bg-indigo-100/50',
+                        )}>
+                          <CloudUpload className={cn(
+                            'w-10 h-10 transition-colors',
+                            isDragActive ? 'text-indigo-600' : 'text-indigo-400 group-hover:text-indigo-500',
+                          )} />
+                        </div>
+                        <h3 className="text-xl font-bold text-slate-800 mb-2">
+                          {isDragActive ? 'Drop the file' : 'Upload Receipt Image'}
+                        </h3>
+                        <p className="text-slate-400 text-sm max-w-[260px] mx-auto">
+                          Drag and drop your image here, or click to browse files. AI will prefill the form.
+                        </p>
+>>>>>>> Stashed changes
                       </div>
                       <h3 className="text-xl font-bold text-slate-800 mb-2">
                         {isDragActive ? "Drop the file" : "Upload Receipt Image"}
@@ -363,12 +547,50 @@ export default function App() {
                       <p className="text-slate-400 text-sm mt-0.5 font-medium">Edit any field to ensure 100% accuracy.</p>
                     </div>
                     <div className="text-[10px] font-black bg-indigo-600 text-white px-2.5 py-1 rounded-full uppercase tracking-widest">
+<<<<<<< Updated upstream
                       AI PRE-FILLED
                     </div>
                   </div>
 
                   <form onSubmit={handleSubmit} className="p-8 space-y-8">
                     {/* Primary Fields */}
+=======
+                      AI PREFILLED
+                    </div>
+                  </div>
+
+                  <form onSubmit={submitReceipt} className="p-8 space-y-8">
+                    {prefillError && (
+                      <div className="p-4 bg-red-50 border border-red-100 rounded-xl flex items-start gap-3 text-red-700">
+                        <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+                        <p className="text-sm font-medium">{prefillError}</p>
+                      </div>
+                    )}
+
+                    {state === 'REVIEW' && (
+                      <div>
+                        <button
+                          type="button"
+                          onClick={handlePrefillWithAI}
+                          disabled={isPrefilling}
+                          className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors"
+                        >
+                          {isPrefilling ? (
+                            <>
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              <span>Prefilling with AI...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles className="w-4 h-4" />
+                              <span>Prefill with AI</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    )}
+
+>>>>>>> Stashed changes
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
                       <div className="col-span-full">
                         <label className="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest mb-2.5">
