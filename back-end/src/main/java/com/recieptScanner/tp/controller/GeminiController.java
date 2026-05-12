@@ -14,11 +14,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/gemini")
-<<<<<<< Updated upstream
-@CrossOrigin(origins = "http://localhost:5173")
-=======
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173"})
->>>>>>> Stashed changes
+@CrossOrigin("http://localhost:3000")
 public class GeminiController {
 
     private static final Logger log = LoggerFactory.getLogger(GeminiController.class);

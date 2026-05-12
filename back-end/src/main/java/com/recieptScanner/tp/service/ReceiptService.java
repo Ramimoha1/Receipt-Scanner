@@ -47,9 +47,6 @@ public class ReceiptService {
         if (receiptDetails.getStatus() != null) {
             receipt.setStatus(receiptDetails.getStatus());
         }
-        if (receiptDetails.getRawAiResponse() != null) {
-            receipt.setRawAiResponse(receiptDetails.getRawAiResponse());
-        }
 
         return receiptRepository.save(receipt);
     }

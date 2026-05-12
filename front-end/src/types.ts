@@ -20,5 +20,22 @@ export interface ReceiptData {
   timestamp: number;
 }
 
-export type AppState = 'IDLE' | 'UPLOADING' | 'EXTRACTING' | 'REVIEW' | 'SUBMITTED';
+export type ReceiptStatus = 'PENDING' | 'REVIEWED' | 'SAVED';
+
+export interface ReceiptFormValues {
+  merchantName: string;
+  transactionDate: string;
+  totalAmount: number;
+  currency: string;
+  imageUrl: string;
+  status?: ReceiptStatus;
+}
+
+export interface ReceiptRecord extends ReceiptFormValues {
+  id: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export type AppState = 'IDLE' | 'REVIEW' | 'SUBMITTED';
 export type ViewMode = 'SCAN' | 'HISTORY';

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -35,11 +36,9 @@ public class Receipt {
     @Column(length = 10)
     private String currency;
 
-    @Column(name = "image_url", nullable = false)
+    @Lob
+    @Column(name = "image_url", nullable = false, columnDefinition = "TEXT")
     private String imageUrl;
-
-    @Column(name = "raw_ai_response", columnDefinition = "jsonb")
-    private String rawAiResponse;
 
     @Column(length = 50)
     private String status; // PENDING, REVIEWED, SAVED

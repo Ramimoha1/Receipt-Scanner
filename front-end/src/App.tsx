@@ -490,6 +490,34 @@ export default function App() {
                   </div>
 
                   <form onSubmit={submitReceipt} className="p-8 space-y-8">
+                    {prefillError && (
+                      <div className="p-4 bg-red-50 border border-red-100 rounded-xl flex items-start gap-3 text-red-700">
+                        <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+                        <p className="text-sm font-medium">{prefillError}</p>
+                      </div>
+                    )}
+
+                    <div className="mb-6">
+                      <button
+                        type="button"
+                        onClick={handlePrefillWithAI}
+                        disabled={isPrefilling}
+                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors"
+                      >
+                        {isPrefilling ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <span>Prefilling with AI...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-4 h-4" />
+                            <span>Prefill with AI</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
                       <div className="col-span-full">
                         <label className="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest mb-2.5">
