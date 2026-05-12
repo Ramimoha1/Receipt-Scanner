@@ -154,6 +154,7 @@ npm run build
 - AI prefill is **opt-in** (manual button click, not automatic)
 - Rate limited by Gemini API quota
 - All receipts stored locally in your database
+- Prompt used: "You are an expert receipt data extractor. Carefully scan the entire image and extract the receipt fields. Return JSON only with merchantName, date, totalAmount, currency, taxAmount, items. CRITICAL: The 'date' field MUST be formatted exactly as YYYY-MM-DD (e.g., 2026-05-12). Look at the top, bottom, and near the transaction ID for the date. Convert any format you find into YYYY-MM-DD. Use short strings, numbers for amounts, and an items array with description, quantity, and price. If a field is truly missing after a thorough search, use an empty string, 0, or null for taxAmount."
 
 ---
 
