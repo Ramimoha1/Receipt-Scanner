@@ -12,6 +12,10 @@ public class GeminiService {
         this.env = env;
     }
 
+    public String generateText(String prompt) {
+        return generatePlaceholder(prompt);
+    }
+
     public String generatePlaceholder(String prompt) {
         return "Gemini service ready; implement generation logic for: " + prompt;
     }
